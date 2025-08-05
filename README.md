@@ -26,7 +26,7 @@ A production-ready, high-performance file upload system built with Next.js 15 an
 
 ## 📸 Interface Preview
 
-![Upload Interface](example_image.png)
+![Upload Interface](demo_image.png)
 
 *Modern drag-and-drop interface with real-time progress tracking and queue management*
 
