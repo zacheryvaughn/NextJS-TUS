@@ -32,9 +32,27 @@ export const useTusFileUpload = () => {
     
     let fileArray = Array.from(files);
     
+    // Filter out duplicates based on filename and size
+    const uniqueFiles = fileArray.filter(newFile => {
+      return !fileQueue.some(existingFile =>
+        existingFile.name === newFile.name && existingFile.size === newFile.size
+      );
+    });
+    
+    // Show message if duplicates were filtered out
+    const duplicateCount = fileArray.length - uniqueFiles.length;
+    if (duplicateCount > 0) {
+      setMessage(`${duplicateCount} duplicate file${duplicateCount > 1 ? 's' : ''} skipped (same name and size).`);
+    }
+    
+    // If no unique files remain, return early
+    if (uniqueFiles.length === 0) {
+      return;
+    }
+    
     // Check if adding these files would exceed the max selection limit
     const currentFileCount = fileQueue.length;
-    const totalFiles = currentFileCount + fileArray.length;
+    const totalFiles = currentFileCount + uniqueFiles.length;
     
     if (totalFiles > TUS_CLIENT_CONFIG.maxFileSelection) {
       const remainingSlots = TUS_CLIENT_CONFIG.maxFileSelection - currentFileCount;
@@ -42,10 +60,14 @@ export const useTusFileUpload = () => {
         setMessage(`Maximum ${TUS_CLIENT_CONFIG.maxFileSelection} files allowed. Remove some files first.`);
         return;
       }
-      setMessage(`Only ${remainingSlots} more files can be added (${TUS_CLIENT_CONFIG.maxFileSelection} max).`);
-      fileArray = fileArray.slice(0, remainingSlots);
+      const previousMessage = duplicateCount > 0 ? `${duplicateCount} duplicates skipped. ` : '';
+      setMessage(`${previousMessage}Only ${remainingSlots} more files can be added (${TUS_CLIENT_CONFIG.maxFileSelection} max).`);
+      fileArray = uniqueFiles.slice(0, remainingSlots);
     } else {
-      setMessage('');
+      fileArray = uniqueFiles;
+      if (duplicateCount === 0) {
+        setMessage('');
+      }
     }
     
     const queuedFiles: QueuedFile[] = fileArray.map(file => ({
@@ -61,7 +83,7 @@ export const useTusFileUpload = () => {
     
     // Append new files to existing queue instead of replacing
     setFileQueue(prev => [...prev, ...queuedFiles]);
-  }, [fileQueue.length]);
+  }, [fileQueue]);
 
   // COMPLETE FILE UPLOAD - Upload entire file as single unit
   const uploadFileComplete = useCallback((queuedFile: QueuedFile): Promise<void> => {

@@ -126,7 +126,7 @@ export default function TusFileUpload() {
 
         {/* File List */}
         {fileQueue.length > 0 && (
-          <div className="flex flex-col gap-2 bg-neutral-950 border p-3 rounded-xl h-120 overflow-auto">
+          <div className="flex flex-col gap-2 bg-neutral-950 border p-3 rounded-xl max-h-96 overflow-auto">
             {fileQueue.map((file) => (
               <div key={file.id} className="flex items-center gap-3 py-3 px-4 border rounded-lg bg-neutral-900">
                 <div className="flex-1 min-w-0">
